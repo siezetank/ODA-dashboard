@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>의료기기 정보시스템 구축 협력사업 · 추진현황</title>
+<!-- ▼▼▼ 공유 설정: 아래 두 값만 본인 Supabase 값으로 교체하면, 링크를 연 모든 사람이 자동 연결됩니다 ▼▼▼ -->
+<script>
+  window.SB_URL = "https://YOUR-PROJECT.supabase.co";
+  window.SB_KEY = "YOUR-ANON-KEY";
+</script>
+<!-- ▲▲▲ (교체 없이 앱 안 '공유 설정'에서 입력해도 됩니다) ▲▲▲ -->
+<style>
+  :root{
+    --paper:#EBEFF4; --surface:#FFFFFF;
+    --ink:#16243F; --ink-soft:#5A6577; --ink-faint:#8A93A3;
+    --line:#DDE3EB; --brand:#1F4E79; --brand-soft:#E8EEF5;
+    --todo:#9AA3B2; --todo-bg:#F1F3F6;
+    --doing:#B9770E; --doing-bg:#FBF1DF;
+    --done:#2F7A56; --done-bg:#E6F1EC;
+    --urgent:#B23A2E; --urgent-bg:#FBECEA;
+    --radius:14px; --shadow:0 1px 2px rgba(22,36,63,.06),0 6px 18px rgba(22,36,63,.05);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--paper);color:var(--ink);}
+  body{font-family:'Apple SD Gothic Neo','Pretendard','Malgun Gothic','Noto Sans KR',system-ui,-apple-system,sans-serif;line-height:1.45;-webkit-font-smoothing:antialiased;padding:18px 14px 64px;font-variant-numeric:tabular-nums;}
+  .wrap{max-width:760px;margin:0 auto;}
+
+  .head{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px;}
+  .head-bar{height:4px;background:linear-gradient(90deg,var(--brand),#3A78AD);}
+  .head-in{padding:18px 18px 16px;}
+  .eyebrow{font-size:11.5px;letter-spacing:.14em;color:var(--brand);font-weight:700;text-transform:uppercase;}
+  h1{font-size:20px;line-height:1.3;margin:5px 0 2px;letter-spacing:-.01em;}
+  .sub{font-size:12.5px;color:var(--ink-faint);}
+  .sync{display:inline-block;font-size:11px;font-weight:700;margin-top:6px;padding:2px 10px;border-radius:99px;border:1px solid var(--line);color:var(--ink-soft);}
+  .sync.on{color:var(--done);background:var(--done-bg);border-color:#BFE0CE;}
+  .sync.on::before{content:"● ";}
+  .sync.off{color:var(--ink-faint);background:var(--paper);}
+  .sync.off::before{content:"○ ";}
+  .gauge-row{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-top:16px;}
+  .gauge-pct{font-size:34px;font-weight:800;line-height:.9;letter-spacing:-.02em;}
+  .gauge-pct small{font-size:14px;font-weight:600;color:var(--ink-soft);margin-left:2px;}
+  .gauge-meta{font-size:12px;color:var(--ink-soft);text-align:right;}
+  .gauge{display:flex;height:12px;border-radius:99px;overflow:hidden;background:var(--todo-bg);margin-top:12px;border:1px solid var(--line);}
+  .gauge span{display:block;height:100%;transition:width .45s cubic-bezier(.2,.7,.2,1);}
+  .gauge .g-done{background:var(--done);} .gauge .g-doing{background:var(--doing);}
+  .chips{display:flex;gap:8px;margin-top:13px;}
+  .chip{flex:1;border:1px solid var(--line);border-radius:10px;padding:9px 10px;text-align:center;}
+  .chip b{display:block;font-size:19px;line-height:1.1;} .chip i{font-style:normal;font-size:11.5px;color:var(--ink-soft);display:block;margin-top:1px;}
+  .chip.c-todo b{color:var(--todo);} .chip.c-doing b{color:var(--doing);} .chip.c-done b{color:var(--done);}
+
+  .cat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:13px;overflow:hidden;}
+  .cat.urgent{border-color:#E9C4BF;}
+  .cat.urgent .cat-head{box-shadow:inset 4px 0 0 var(--urgent);}
+  .cat-head{padding:14px 16px 12px;border-bottom:1px solid var(--line);}
+  .cat-top{display:flex;align-items:center;gap:8px;}
+  .cat-idx{font-size:12px;font-weight:800;color:var(--brand);letter-spacing:.05em;}
+  .cat-title{font-size:15.5px;font-weight:700;letter-spacing:-.01em;}
+  .badge-urgent{margin-left:auto;font-size:11px;font-weight:700;color:var(--urgent);background:var(--urgent-bg);border:1px solid #E9C4BF;padding:2px 8px;border-radius:99px;}
+  .tag-urg{display:inline-block;font-size:10px;font-weight:700;color:var(--urgent);background:var(--urgent-bg);border:1px solid #E9C4BF;padding:1px 6px;border-radius:99px;vertical-align:middle;margin-left:3px;}
+  .task.urgent-item .task-main{box-shadow:inset 3px 0 0 var(--urgent);}
+  .urg-btn{font:inherit;font-size:12.5px;font-weight:700;color:var(--ink-soft);background:#fff;border:1px solid var(--line);border-radius:99px;padding:6px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .urg-btn.on{color:var(--urgent);background:var(--urgent-bg);border-color:#E9C4BF;}
+  .cat-prog{display:flex;align-items:center;gap:8px;margin-top:9px;}
+  .cat-bar{flex:1;height:6px;border-radius:99px;background:var(--todo-bg);overflow:hidden;}
+  .cat-bar span{display:block;height:100%;background:var(--done);transition:width .45s cubic-bezier(.2,.7,.2,1);}
+  .cat-frac{font-size:11.5px;color:var(--ink-soft);font-weight:600;min-width:34px;text-align:right;}
+
+  .task{border-bottom:1px solid var(--line);}
+  .task:last-of-type{border-bottom:none;}
+  .task-main{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;}
+  .ref{flex:none;margin-top:1px;font-size:10.5px;font-weight:700;color:var(--ink-faint);border:1px solid var(--line);border-radius:6px;padding:2px 5px;background:var(--paper);min-width:26px;text-align:center;}
+  .ref-sm{font-size:9.5px;min-width:30px;padding:1px 4px;}
+  .task-body{flex:1;min-width:0;}
+  .task-name{font-size:14.5px;font-weight:600;color:var(--ink);word-break:keep-all;}
+  .task-name.done{color:var(--ink-faint);text-decoration:line-through;text-decoration-color:#C7CDD7;}
+
+  .pills{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap;}
+  .pill{font-size:12px;font-weight:600;color:var(--ink-soft);background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:4px 11px;cursor:pointer;transition:background .15s,color .15s,border-color .15s;-webkit-tap-highlight-color:transparent;}
+  .pill:hover{border-color:#C2CAD6;}
+  .pill[data-status="todo"].on{background:var(--todo-bg);border-color:var(--todo);color:var(--todo);}
+  .pill[data-status="doing"].on{background:var(--doing-bg);border-color:var(--doing);color:var(--doing);}
+  .pill[data-status="done"].on{background:var(--done-bg);border-color:var(--done);color:var(--done);}
+  .pill.on{font-weight:700;}
+
+  .subprog{display:flex;align-items:center;gap:8px;margin-top:9px;}
+  .subprog .frac{font-size:12px;font-weight:700;color:var(--ink-soft);min-width:34px;}
+  .subprog .bar{flex:1;height:6px;border-radius:99px;background:var(--todo-bg);overflow:hidden;}
+  .subprog .bar span{display:block;height:100%;background:var(--done);transition:width .45s cubic-bezier(.2,.7,.2,1);}
+
+  .sched{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-top:3px;}
+  .sched.late{color:var(--urgent);} .sched.done{color:var(--done);}
+
+  .task-tools{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;}
+  .icon-btn{border:none;background:none;cursor:pointer;color:var(--ink-faint);font-size:15px;line-height:1;padding:4px;border-radius:6px;}
+  .icon-btn:hover{color:var(--ink);background:var(--paper);}
+
+  .detail{display:none;padding:2px 16px 14px;}
+  .detail.open{display:block;}
+
+  .sub-label{font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--brand);margin:6px 0 2px;}
+  .subs{border-left:2px solid var(--line);margin-left:4px;padding-left:9px;}
+  .subrow{border-bottom:1px dashed var(--line);}
+  .subrow:last-of-type{border-bottom:none;}
+  .sub-main{display:flex;align-items:flex-start;gap:8px;padding:9px 0;}
+  .sub-name{font-size:13.5px;font-weight:600;color:var(--ink);word-break:keep-all;}
+  .sub-name.done{color:var(--ink-faint);text-decoration:line-through;text-decoration-color:#C7CDD7;}
+  .subrow .detail{padding:0 0 10px 30px;}
+
+  .meta-block{margin-top:12px;padding-top:11px;border-top:1px solid var(--line);}
+  .meta-label{font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--ink-faint);margin-bottom:6px;}
+
+  .field{margin-top:10px;}
+  .field label{display:block;font-size:11px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;letter-spacing:.02em;}
+  .field input,.field textarea{width:100%;font:inherit;font-size:13px;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:#FAFBFC;resize:vertical;}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px var(--brand-soft);}
+  .field-row{display:flex;gap:10px;} .field-row .field{flex:1;margin-top:10px;}
+
+  .add{padding:10px 0 4px;}
+  .add-row{display:flex;gap:8px;}
+  .add input{flex:1;font:inherit;font-size:13px;border:1px dashed var(--line);border-radius:9px;padding:9px 11px;background:transparent;}
+  .add input:focus{outline:none;border-color:var(--brand);border-style:solid;background:#fff;}
+  .add button{flex:none;font:inherit;font-size:13px;font-weight:700;color:var(--brand);background:var(--brand-soft);border:none;border-radius:9px;padding:0 14px;cursor:pointer;}
+  .add button:hover{background:#dbe6f1;}
+  .add-task{padding:10px 16px 14px;}
+
+  .actions{display:flex;gap:8px;margin-top:6px;}
+  .act-btn{flex:1;font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);border-radius:10px;padding:11px;cursor:pointer;box-shadow:var(--shadow);}
+  .act-btn:hover{color:var(--ink);border-color:#C2CAD6;}
+  .act-btn.danger:hover{color:var(--urgent);border-color:#E9C4BF;}
+
+  .report{display:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-top:13px;padding:16px;}
+  .report.open{display:block;}
+  .report h3{font-size:14px;margin-bottom:4px;}
+  .report p.hint{font-size:11.5px;color:var(--ink-faint);margin-bottom:10px;}
+  .report pre{font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',monospace;font-size:12.5px;line-height:1.7;color:var(--ink);white-space:pre-wrap;word-break:break-word;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;user-select:all;}
+  .panel{display:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-top:13px;padding:16px;}
+  .panel.open{display:block;}
+  .panel h3{font-size:14px;margin-bottom:4px;}
+  .panel p.hint{font-size:11.5px;color:var(--ink-faint);margin-bottom:8px;line-height:1.5;}
+  .panel-actions{display:flex;gap:8px;margin-top:14px;}
+  .act-btn.brand{color:#fff;background:var(--brand);border-color:var(--brand);}
+  .act-btn.brand:hover{background:#1a4368;color:#fff;}
+
+  .foot-note{text-align:center;font-size:11px;color:var(--ink-faint);margin-top:20px;}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+  @media (max-width:420px){ h1{font-size:18px;} .gauge-pct{font-size:30px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <div class="head-bar"></div>
+    <div class="head-in">
+      <div class="eyebrow">KOICA · 베트남 ODA 협력사업</div>
+      <h1>의료기기 정보시스템 구축 협력사업<br>추진현황</h1>
+      <div class="sub" id="dateLine"></div>
+      <span id="syncStatus" class="sync off">로컬 모드</span>
+      <div class="gauge-row">
+        <div class="gauge-pct"><span id="pct">0</span><small>% 완료</small></div>
+        <div class="gauge-meta" id="gMeta"></div>
+      </div>
+      <div class="gauge"><span class="g-done" id="gDone" style="width:0"></span><span class="g-doing" id="gDoing" style="width:0"></span></div>
+      <div class="chips">
+        <div class="chip c-todo"><b id="nTodo">0</b><i>미착수</i></div>
+        <div class="chip c-doing"><b id="nDoing">0</b><i>진행중</i></div>
+        <div class="chip c-done"><b id="nDone">0</b><i>완료</i></div>
+      </div>
+    </div>
+  </header>
+
+  <main id="cats"></main>
+
+  <div class="actions">
+    <button class="act-btn" id="btnShare">⚙ 공유 설정</button>
+    <button class="act-btn" id="btnReport">📋 보고용 요약</button>
+    <button class="act-btn danger" id="btnReset">초기화</button>
+  </div>
+
+  <section class="panel" id="sharePanel">
+    <h3>실시간 공유 설정</h3>
+    <p class="hint">Supabase 프로젝트의 URL과 anon key를 붙여넣고 저장하면 실시간 공유로 전환됩니다. 다른 사람이 접속하려면 이 페이지를 웹(GitHub Pages 등)에 올려 링크로 공유해야 합니다.</p>
+    <div class="field"><label>Project URL</label><input id="cfgUrl" type="text" placeholder="https://xxxx.supabase.co"></div>
+    <div class="field"><label>anon public key</label><input id="cfgKey" type="text" placeholder="eyJ... (anon public)"></div>
+    <div class="panel-actions">
+      <button class="act-btn brand" id="btnSaveCfg">저장 & 연결</button>
+      <button class="act-btn" id="btnDisc">연결 끊기</button>
+    </div>
+  </section>
+
+  <section class="report" id="report">
+    <h3>개조식 진행현황 요약</h3>
+    <p class="hint">아래 영역을 길게 눌러 전체 선택 → 복사하면 공문·메신저에 바로 붙여넣을 수 있습니다.</p>
+    <pre id="reportText"></pre>
+  </section>
+
+  <p class="foot-note">상태·일정 변경은 자동 저장되어 다시 열어도 유지됩니다.</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var KEY="mfds_oda_tracker_v2";
+  var STATUS={todo:"미착수",doing:"진행중",done:"완료"};
+  var hasStore=(typeof window!=="undefined")&&window.storage&&typeof window.storage.get==="function";
+
+  var CATS=[
+    {id:"doc",     idx:"Ⅰ", title:"협정·사업추진 문서", urgent:false},
+    {id:"report",  idx:"Ⅱ", title:"보고·정산",         urgent:false},
+    {id:"trip",    idx:"Ⅲ", title:"출장·발대식 준비",   urgent:true},
+    {id:"meeting", idx:"Ⅳ", title:"정기 회의",          urgent:false}
+  ];
+
+  function sub(name,opt){ opt=opt||{}; return {name:name,status:"todo",urgent:false,owner:opt.owner||"",start:"",expEnd:"",end:"",memo:opt.memo||""}; }
+  var DEFAULTS=[
+    {cat:"doc", ref:"1", name:"합의의사록(AM) 작성·협의", owner:"", start:"",expEnd:"",end:"",memo:"", subs:[
+      sub("AM 초안 작성"), sub("코이카 질의·회신 확정") ]},
+    {cat:"doc", ref:"2", name:"사업 발주", owner:"", start:"",expEnd:"",end:"",memo:"", subs:[
+      sub("사업계획서·제안요청서 작성"), sub("보안성 검토"), sub("일상감사"), sub("사전협의"), sub("조달청 공고"), sub("지급(계약)") ]},
+    {cat:"report", ref:"4", name:"분기 보고서 작성", owner:"", start:"",expEnd:"",end:"",memo:"", subs:[
+      sub("ISP 추진현황"), sub("현지 역량강화"), sub("KOFIH 분기회의 결과") ]},
+    {cat:"report", ref:"5", name:"정산·2차 약정금 신청", owner:"", start:"",expEnd:"",end:"",memo:"", subs:[
+      sub("1차분 정산"), sub("2차 약정금 신청",{memo:"※ 1차 정산 완료 후"}) ]},
+    {cat:"trip", ref:"6", name:"출장계획서 작성 (국장님 참석 ver.)", status:"todo", owner:"", start:"",expEnd:"",end:"",memo:"", subs:[]},
+    {cat:"trip", ref:"7", name:"코이카와 출장 세부일정 논의", owner:"코이카 공동", start:"",expEnd:"",end:"",memo:"", subs:[
+      sub("VIMDA 오찬·만찬"), sub("사무소장 오찬·만찬") ]},
+    {cat:"trip", ref:"3", name:"간담회·워크숍 준비", owner:"", start:"",expEnd:"",end:"",memo:"", subs:[
+      sub("간담회"), sub("워크숍") ]},
+    {cat:"trip", ref:"8", name:"기념품 최종 확정", owner:"", start:"",expEnd:"",end:"",memo:"", subs:[
+      sub("기관 간 선물"), sub("VVIP (곤룡포잔)"), sub("VIP",{memo:"품목 미정"}), sub("일반") ]},
+    {cat:"meeting", ref:"9", name:"KOFIH 분기 회의", owner:"KOFIH 공동", start:"",expEnd:"",end:"",memo:"", subs:[
+      sub("출장 일정·진행상황 공유(안건)") ]}
+  ];
+
+  var state={tasks:[],updated:null,open:{}};
+  var saveTimer=null;
+  function uid(){ return "x"+Math.random().toString(36).slice(2,9); }
+
+  function seed(){
+    return DEFAULTS.map(function(d){
+      var t={cat:d.cat,ref:d.ref,name:d.name,status:d.status||"todo",urgent:(d.urgent!==undefined?d.urgent:(d.cat==="trip")),owner:d.owner||"",start:d.start||"",expEnd:d.expEnd||"",end:d.end||"",memo:d.memo||"",id:uid(),subs:[]};
+      (d.subs||[]).forEach(function(s){ var o={}; for(var k in s) o[k]=s[k]; o.id=uid(); t.subs.push(o); });
+      return t;
+    });
+  }
+  function normalize(tasks){
+    tasks.forEach(function(t){
+      if(!t.id) t.id=uid(); if(!t.subs) t.subs=[];
+      ["start","expEnd","end","owner","memo"].forEach(function(k){ if(t[k]===undefined) t[k]=""; });
+      if(!t.status) t.status="todo"; if(t.urgent===undefined) t.urgent=(t.cat==="trip");
+      t.subs.forEach(function(s){ if(!s.id) s.id=uid(); ["start","expEnd","end","owner","memo"].forEach(function(k){ if(s[k]===undefined) s[k]=""; }); if(!s.status) s.status="todo"; if(s.urgent===undefined) s.urgent=false; });
+    });
+    return tasks;
+  }
+
+  // ===== 외부망 실시간 공유 (Supabase) — 값은 상단 SB_URL/SB_KEY 또는 앱 내 '공유 설정' =====
+  var ROW_ID=1, CFG_KEY="oda_supabase_cfg";
+  var clientId="c"+Math.random().toString(36).slice(2,10);
+  var sb=null, channel=null, applyingRemote=false, pendingRemote=null, memCfg=null;
+
+  function lsGet(k){ try{ return window.localStorage.getItem(k); }catch(e){ return null; } }
+  function lsSet(k,v){ try{ window.localStorage.setItem(k,v); return true; }catch(e){ return false; } }
+  function lsDel(k){ try{ window.localStorage.removeItem(k); }catch(e){} }
+  function cfgValid(c){ return !!(c&&c.url&&c.key&&/^https?:\/\//.test(c.url)&&c.url.indexOf("YOUR-PROJECT")<0&&c.key.indexOf("YOUR-")<0); }
+  function constCfg(){ return {url:(window.SB_URL||""),key:(window.SB_KEY||"")}; }
+  function readCfg(){
+    var raw=lsGet(CFG_KEY); if(raw){ try{ var o=JSON.parse(raw); if(o&&o.url&&o.key) return o; }catch(e){} }
+    if(memCfg) return memCfg;
+    var cc=constCfg(); if(cfgValid(cc)) return cc;
+    return null;
+  }
+  function setStatus(t,ok){ var el=document.getElementById("syncStatus"); if(el){ el.textContent=t; el.className="sync"+(ok?" on":" off"); } }
+  function isEditing(){ var a=document.activeElement; return !!a && (a.tagName==="INPUT"||a.tagName==="TEXTAREA"); }
+  function loadSupabaseLib(){ return new Promise(function(res,rej){ if(window.supabase) return res(); var sc=document.createElement("script"); sc.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"; sc.onload=res; sc.onerror=rej; document.head.appendChild(sc); }); }
+  function applyRemote(s){ applyingRemote=true; state.tasks=normalize(s.tasks||seed()); state.updated=s.updated||null; render(); applyingRemote=false; }
+  function subscribeRealtime(){
+    if(!sb) return;
+    channel=sb.channel("oda-"+ROW_ID).on("postgres_changes",{event:"*",schema:"public",table:"oda_dashboard",filter:"id=eq."+ROW_ID},function(payload){
+      var row=payload.new; if(!row||!row.data) return; var s=row.data;
+      if(s.clientId===clientId) return;
+      if(isEditing()){ pendingRemote=s; return; }
+      applyRemote(s);
+    }).subscribe();
+  }
+  async function connect(){
+    var c=readCfg(); if(!cfgValid(c)){ setStatus("로컬 모드 · 공유 설정 필요",false); return false; }
+    setStatus("연결 중…",false);
+    try{
+      await loadSupabaseLib();
+      if(channel&&sb){ try{ sb.removeChannel(channel); }catch(e){} channel=null; }
+      sb=window.supabase.createClient(c.url,c.key);
+      var resp=await sb.from("oda_dashboard").select("data").eq("id",ROW_ID).maybeSingle();
+      if(resp.error) throw resp.error;
+      if(resp.data&&resp.data.data){ var s=resp.data.data; state.tasks=normalize(s.tasks||seed()); state.updated=s.updated||null; render(); }
+      else { state.tasks=seed(); render(); save(); }
+      subscribeRealtime();
+      setStatus("실시간 연결됨",true);
+      return true;
+    }catch(e){ sb=null; setStatus("연결 실패 · 설정 확인",false); return false; }
+  }
+  function disconnectShare(){
+    if(channel&&sb){ try{ sb.removeChannel(channel); }catch(e){} }
+    channel=null; sb=null; memCfg=null; lsDel(CFG_KEY); setStatus("로컬 모드",false);
+  }
+  function saveCfg(){
+    var url=(document.getElementById("cfgUrl").value||"").trim().replace(/\/+$/,"");
+    var key=(document.getElementById("cfgKey").value||"").trim();
+    if(!/^https?:\/\//.test(url)||!key){ alert("URL과 anon key를 정확히 입력해 주세요."); return; }
+    memCfg={url:url,key:key}; lsSet(CFG_KEY,JSON.stringify(memCfg));
+    connect().then(function(ok){ alert(ok?"연결되었습니다. 이제 이 페이지 링크를 팀에 공유하세요.":"연결 실패: URL·키와 SQL(테이블/정책) 설정을 확인해 주세요."); });
+  }
+
+  async function load(){
+    if(cfgValid(readCfg())){ var ok=await connect(); if(ok) return; }
+    else { setStatus("로컬 모드 · 공유 설정 필요",false); }
+    if(hasStore){
+      try{ var r=await window.storage.get(KEY); if(r&&r.value){ var ls=JSON.parse(r.value); state.tasks=normalize(ls.tasks||seed()); state.updated=ls.updated||null; render(); return; } }catch(e){}
+    }
+    state.tasks=seed(); render(); if(hasStore) save();
+  }
+  function save(){
+    state.updated=Date.now(); renderDate();
+    if(sb){
+      if(saveTimer) clearTimeout(saveTimer);
+      saveTimer=setTimeout(function(){
+        var payload={tasks:state.tasks,updated:state.updated,clientId:clientId};
+        sb.from("oda_dashboard").upsert({id:ROW_ID,data:payload,updated_at:new Date().toISOString()}).then(function(r){ setStatus((r&&r.error)?"저장 오류":"실시간 연결됨", !(r&&r.error)); });
+      },400);
+      return;
+    }
+    if(!hasStore) return;
+    if(saveTimer) clearTimeout(saveTimer);
+    saveTimer=setTimeout(function(){ try{ window.storage.set(KEY,JSON.stringify({tasks:state.tasks,updated:state.updated})); }catch(e){} },250);
+  }
+
+  function fmtDate(ts){ var d=ts?new Date(ts):new Date(); var w=["일","월","화","수","목","금","토"]; return d.getFullYear()+"."+("0"+(d.getMonth()+1)).slice(-2)+"."+("0"+d.getDate()).slice(-2)+" ("+w[d.getDay()]+")"; }
+  function renderDate(){ document.getElementById("dateLine").textContent="기준일 "+fmtDate(null)+(state.updated?" · 최종 수정 "+fmtDate(state.updated):""); }
+  function fmtShort(iso){ if(!iso) return ""; var p=iso.split("-"); return p.length===3?p[1]+"."+p[2]:iso; }
+  function dday(iso){ if(!iso) return null; var t=new Date(iso+"T00:00:00"); var n=new Date(); n.setHours(0,0,0,0); return Math.round((t-n)/86400000); }
+  function esc(s){ return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m];}); }
+
+  function scheduleMeta(o){
+    if(o.end) return '<div class="sched done">완료 '+fmtShort(o.end)+'</div>';
+    if(o.expEnd){ var d=dday(o.expEnd); var tag=d>0?"D-"+d:(d===0?"D-DAY":(-d)+"일 지연"); return '<div class="sched'+(d<0?" late":"")+'">예상종료 '+fmtShort(o.expEnd)+' · '+tag+'</div>'; }
+    if(o.start) return '<div class="sched">착수 '+fmtShort(o.start)+'</div>';
+    return "";
+  }
+  function effSched(t){
+    if(t.subs&&t.subs.length){
+      if(t.start||t.expEnd||t.end) return t;
+      var exps=t.subs.map(function(s){return s.expEnd;}).filter(Boolean).sort();
+      var ends=t.subs.map(function(s){return s.end;}).filter(Boolean).sort();
+      var allDone=t.subs.every(function(s){return s.status==="done";});
+      return {start:"",expEnd:exps.length?exps[exps.length-1]:"",end:(allDone&&ends.length)?ends[ends.length-1]:""};
+    }
+    return t;
+  }
+  function subDone(t){ return t.subs.filter(function(s){return s.status==="done";}).length; }
+  function leafStatuses(){
+    var arr=[];
+    state.tasks.forEach(function(t){ if(t.subs&&t.subs.length) t.subs.forEach(function(s){arr.push(s.status);}); else arr.push(t.status); });
+    return arr;
+  }
+  function catLeaves(catId){
+    var arr=[];
+    state.tasks.filter(function(t){return t.cat===catId;}).forEach(function(t){ if(t.subs&&t.subs.length) t.subs.forEach(function(s){arr.push(s.status);}); else arr.push(t.status); });
+    return arr;
+  }
+  function countBy(list){ var c={todo:0,doing:0,done:0}; list.forEach(function(s){c[s]=(c[s]||0)+1;}); return c; }
+
+  function findItem(id){
+    for(var i=0;i<state.tasks.length;i++){ if(state.tasks[i].id===id) return state.tasks[i];
+      var su=state.tasks[i].subs||[]; for(var j=0;j<su.length;j++){ if(su[j].id===id) return su[j]; } }
+    return null;
+  }
+  function delItem(id){
+    for(var i=0;i<state.tasks.length;i++){ if(state.tasks[i].id===id){ state.tasks.splice(i,1); return; }
+      var su=state.tasks[i].subs||[]; for(var j=0;j<su.length;j++){ if(su[j].id===id){ su.splice(j,1); return; } } }
+  }
+  function parentRefOf(id){
+    for(var i=0;i<state.tasks.length;i++){ var su=state.tasks[i].subs||[]; for(var j=0;j<su.length;j++){ if(su[j].id===id) return {ref:state.tasks[i].ref,idx:j}; } }
+    return null;
+  }
+
+  function fieldsHTML(o){
+    var h='<div class="field"><label>긴급 여부</label><button type="button" class="urg-btn'+(o.urgent?' on':'')+'" data-act="urgent" data-id="'+o.id+'">'+(o.urgent?'긴급':'일반')+'</button></div>';
+    h+='<div class="field-row"><div class="field"><label>시작일</label><input type="date" data-act="field" data-field="start" data-id="'+o.id+'" value="'+esc(o.start)+'"></div>';
+    h+='<div class="field"><label>예상종료일</label><input type="date" data-act="field" data-field="expEnd" data-id="'+o.id+'" value="'+esc(o.expEnd)+'"></div></div>';
+    h+='<div class="field-row"><div class="field"><label>종료일</label><input type="date" data-act="field" data-field="end" data-id="'+o.id+'" value="'+esc(o.end)+'"></div>';
+    h+='<div class="field"><label>담당</label><input data-act="field" data-field="owner" data-id="'+o.id+'" value="'+esc(o.owner)+'" placeholder="예: 본인 / 코이카"></div></div>';
+    h+='<div class="field"><label>비고</label><textarea rows="2" data-act="field" data-field="memo" data-id="'+o.id+'" placeholder="진행 메모 / 선행조건 등">'+esc(o.memo)+'</textarea></div>';
+    return h;
+  }
+  function pillsHTML(o){
+    var h='<div class="pills">';
+    ["todo","doing","done"].forEach(function(s){ h+='<button class="pill'+(o.status===s?' on':'')+'" data-status="'+s+'" data-act="status" data-id="'+o.id+'">'+STATUS[s]+'</button>'; });
+    return h+'</div>';
+  }
+
+  function render(){
+    renderDate();
+    var total=leafStatuses(); var c=countBy(total); var n=total.length;
+    var pctDone=n?Math.round(c.done/n*100):0;
+    document.getElementById("pct").textContent=pctDone;
+    document.getElementById("gDone").style.width=(n?c.done/n*100:0)+"%";
+    document.getElementById("gDoing").style.width=(n?c.doing/n*100:0)+"%";
+    document.getElementById("gMeta").innerHTML="세부항목 "+n+"건 중 완료 "+c.done+"건<br>진행중 "+c.doing+"건 · 미착수 "+c.todo+"건";
+    document.getElementById("nTodo").textContent=c.todo;
+    document.getElementById("nDoing").textContent=c.doing;
+    document.getElementById("nDone").textContent=c.done;
+
+    var html="";
+    CATS.forEach(function(cat){
+      var tasks=state.tasks.filter(function(t){return t.cat===cat.id;});
+      var lf=countBy(catLeaves(cat.id)); var ln=lf.todo+lf.doing+lf.done;
+      var frac=ln?Math.round(lf.done/ln*100):0;
+      var catUrg=tasks.some(function(t){return t.urgent||(t.subs&&t.subs.some(function(s){return s.urgent;}));});
+      html+='<section class="cat'+(catUrg?' urgent':'')+'">';
+      html+='<div class="cat-head"><div class="cat-top"><span class="cat-idx">'+cat.idx+'</span><span class="cat-title">'+esc(cat.title)+'</span>'+(catUrg?'<span class="badge-urgent">긴급</span>':'')+'</div>';
+      html+='<div class="cat-prog"><div class="cat-bar"><span style="width:'+frac+'%"></span></div><span class="cat-frac">'+lf.done+'/'+ln+'</span></div></div>';
+
+      tasks.forEach(function(t){
+        var op=state.open[t.id];
+        var hasSub=t.subs&&t.subs.length;
+        var allDone=hasSub&&t.subs.every(function(s){return s.status==="done";});
+        html+='<div class="task'+(t.urgent?' urgent-item':'')+'"><div class="task-main"><span class="ref">'+esc(t.ref)+'</span>';
+        html+='<div class="task-body"><div class="task-name'+((hasSub&&allDone)||(!hasSub&&t.status==="done")?' done':'')+'">'+esc(t.name)+(t.urgent?' <span class="tag-urg">긴급</span>':'')+'</div>';
+        html+=scheduleMeta(effSched(t));
+        if(hasSub){ var d=subDone(t); var f=t.subs.length?Math.round(d/t.subs.length*100):0;
+          html+='<div class="subprog"><span class="frac">'+d+'/'+t.subs.length+'</span><div class="bar"><span style="width:'+f+'%"></span></div></div>';
+        } else { html+=pillsHTML(t); }
+        html+='</div><div class="task-tools"><button class="icon-btn" data-act="toggle" data-id="'+t.id+'">'+(op?'▴':'▾')+'</button><button class="icon-btn" data-act="del" data-id="'+t.id+'">✕</button></div></div>';
+
+        html+='<div class="detail'+(op?' open':'')+'">';
+        html+='<div class="sub-label">세부 태스크</div><div class="subs">';
+        t.subs.forEach(function(s,i){
+          var sop=state.open[s.id];
+          html+='<div class="subrow"><div class="sub-main"><span class="ref ref-sm">'+esc(t.ref)+'-'+(i+1)+'</span>';
+          html+='<div class="task-body"><div class="sub-name'+(s.status==="done"?' done':'')+'">'+esc(s.name)+(s.urgent?' <span class="tag-urg">긴급</span>':'')+'</div>';
+          html+=scheduleMeta(s)+pillsHTML(s)+'</div>';
+          html+='<div class="task-tools"><button class="icon-btn" data-act="toggle" data-id="'+s.id+'">'+(sop?'▴':'▾')+'</button><button class="icon-btn" data-act="del" data-id="'+s.id+'">✕</button></div></div>';
+          html+='<div class="detail'+(sop?' open':'')+'">'+fieldsHTML(s)+'</div></div>';
+        });
+        html+='</div>';
+        html+='<div class="add"><div class="add-row"><input type="text" data-addsub="'+t.id+'" placeholder="세부 태스크 추가"><button data-act="addsub" data-tid="'+t.id+'">추가</button></div></div>';
+
+        html+='<div class="meta-block"><div class="meta-label">항목 일정·담당·비고</div>'+fieldsHTML(t)+'</div>';
+        html+='</div></div>';
+      });
+
+      html+='<div class="add-task"><div class="add-row"><input type="text" data-addcat="'+cat.id+'" placeholder="새 항목 추가"><button data-act="add" data-cat="'+cat.id+'">추가</button></div></div>';
+      html+='</section>';
+    });
+    document.getElementById("cats").innerHTML=html;
+    if(document.getElementById("report").classList.contains("open")) buildReport();
+  }
+
+  var root=document.getElementById("cats");
+  root.addEventListener("click",function(e){
+    var el=e.target.closest("[data-act]"); if(!el) return;
+    var act=el.getAttribute("data-act"), id=el.getAttribute("data-id");
+    if(act==="status"){ var it=findItem(id); if(it){ it.status=el.getAttribute("data-status"); save(); render(); } }
+    else if(act==="toggle"){ state.open[id]=!state.open[id]; render(); }
+    else if(act==="urgent"){ var iu=findItem(id); if(iu){ iu.urgent=!iu.urgent; save(); render(); } }
+    else if(act==="del"){ var it2=findItem(id); if(it2&&confirm('"'+it2.name+'" 항목을 삭제할까요?')){ delItem(id); delete state.open[id]; save(); render(); } }
+    else if(act==="addsub"){ var tid=el.getAttribute("data-tid"); var inp=document.querySelector('[data-addsub="'+tid+'"]'); var v=inp.value.trim(); if(!v) return; var t=findItem(tid); if(t){ if(!t.subs)t.subs=[]; var ns=sub(v); ns.id=uid(); t.subs.push(ns); state.open[tid]=true; save(); render(); } }
+    else if(act==="add"){ var cat=el.getAttribute("data-cat"); var inp2=document.querySelector('[data-addcat="'+cat+'"]'); var v2=inp2.value.trim(); if(!v2) return; state.tasks.push({id:uid(),cat:cat,ref:"+",name:v2,status:"todo",urgent:false,owner:"",start:"",expEnd:"",end:"",memo:"",subs:[]}); save(); render(); }
+  });
+  root.addEventListener("input",function(e){ var el=e.target.closest("[data-act='field']"); if(!el) return; var it=findItem(el.getAttribute("data-id")); if(it){ it[el.getAttribute("data-field")]=el.value; save(); } });
+  root.addEventListener("change",function(e){ var el=e.target.closest("[data-act='field']"); if(!el) return; var it=findItem(el.getAttribute("data-id")); if(!it) return; var f=el.getAttribute("data-field"); it[f]=el.value; save(); if(f==="start"||f==="expEnd"||f==="end") render(); });
+  root.addEventListener("keydown",function(e){
+    if(e.key!=="Enter") return;
+    if(e.target.matches("[data-addsub]")){ var tid=e.target.getAttribute("data-addsub"); var v=e.target.value.trim(); if(!v) return; var t=findItem(tid); if(t){ if(!t.subs)t.subs=[]; var ns=sub(v); ns.id=uid(); t.subs.push(ns); state.open[tid]=true; save(); render(); } }
+    else if(e.target.matches("[data-addcat]")){ var cat=e.target.getAttribute("data-addcat"); var v2=e.target.value.trim(); if(!v2) return; state.tasks.push({id:uid(),cat:cat,ref:"+",name:v2,status:"todo",urgent:false,owner:"",start:"",expEnd:"",end:"",memo:"",subs:[]}); save(); render(); }
+  });
+
+  document.addEventListener("focusout",function(){ setTimeout(function(){ if(pendingRemote && !isEditing()){ applyRemote(pendingRemote); pendingRemote=null; } },60); });
+  document.getElementById("btnShare").addEventListener("click",function(){
+    var pn=document.getElementById("sharePanel"); pn.classList.toggle("open");
+    if(pn.classList.contains("open")){ var c=readCfg(); document.getElementById("cfgUrl").value=(c&&cfgValid(c))?c.url:""; document.getElementById("cfgKey").value=(c&&cfgValid(c))?c.key:""; pn.scrollIntoView({behavior:"smooth",block:"start"}); }
+  });
+  document.getElementById("btnSaveCfg").addEventListener("click",saveCfg);
+  document.getElementById("btnDisc").addEventListener("click",function(){ if(confirm("실시간 공유를 끊고 로컬 모드로 전환할까요?")) disconnectShare(); });
+  document.getElementById("btnReset").addEventListener("click",function(){ if(!confirm("모든 항목·세부태스크를 초기 상태로 되돌립니다. 진행할까요?")) return; state.tasks=seed(); state.open={}; save(); render(); });
+  document.getElementById("btnReport").addEventListener("click",function(){ var r=document.getElementById("report"); r.classList.toggle("open"); if(r.classList.contains("open")){ buildReport(); r.scrollIntoView({behavior:"smooth",block:"start"}); } });
+
+  function aggMark(t){
+    if(t.subs&&t.subs.length){ var d=subDone(t); if(d===t.subs.length) return "✔"; if(d>0||t.subs.some(function(s){return s.status==="doing";})) return "◐"; return "□"; }
+    return t.status==="done"?"✔":t.status==="doing"?"◐":"□";
+  }
+  function tail(o){ var a=[]; if(o.start)a.push("착수 "+fmtShort(o.start)); if(o.end)a.push("종료 "+fmtShort(o.end)); else if(o.expEnd)a.push("예상종료 "+fmtShort(o.expEnd)); if(o.owner)a.push(o.owner); return a.length?" ("+a.join(" / ")+")":""; }
+  function buildReport(){
+    var c=countBy(leafStatuses()); var n=c.todo+c.doing+c.done; var pct=n?Math.round(c.done/n*100):0;
+    var L=["□ 의료기기 정보시스템 구축 협력사업 추진현황 ("+fmtDate(null)+" 기준)"," ㅇ 세부항목 "+n+"건 / 완료 "+c.done+"건("+pct+"%) · 진행중 "+c.doing+"건 · 미착수 "+c.todo+"건",""];
+    CATS.forEach(function(cat){
+      var tasks=state.tasks.filter(function(t){return t.cat===cat.id;}); if(!tasks.length) return;
+      var lf=countBy(catLeaves(cat.id));
+      var catUrg=tasks.some(function(t){return t.urgent||(t.subs&&t.subs.some(function(s){return s.urgent;}));});
+      L.push("□ "+cat.idx+". "+cat.title+" ("+lf.done+"/"+(lf.todo+lf.doing+lf.done)+")"+(catUrg?" ※긴급":""));
+      tasks.forEach(function(t){
+        var ug=t.urgent?" ※긴급":"";
+        if(t.subs&&t.subs.length){
+          L.push("  - ["+aggMark(t)+"] "+t.name+" ("+subDone(t)+"/"+t.subs.length+")"+ug);
+          t.subs.forEach(function(s){ L.push("      · ["+(s.status==="done"?"✔":s.status==="doing"?"◐":"□")+"] "+s.name+(s.urgent?" ※긴급":"")+tail(s)); });
+        } else { L.push("  - ["+aggMark(t)+"] "+t.name+tail(t)+ug); }
+      });
+      L.push("");
+    });
+    document.getElementById("reportText").textContent=L.join("\n").replace(/\n+$/,"");
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>
