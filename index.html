@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>의료기기 정보시스템 구축 협력사업 · 추진현황</title>
+<title>베트남 의료기기정보시스템 구축 파일럿 추진현황</title>
 <!-- ▼▼▼ 공유 설정: 아래 두 값만 본인 Supabase 값으로 교체하면, 링크를 연 모든 사람이 자동 연결됩니다 ▼▼▼ -->
 <script>
-  window.SB_URL = "https://bjkaccmrmhfalfherlbm.supabase.co/";
+  window.SB_URL = "https://bjkaccmrmhfalfherlbm.supabase.co";
   window.SB_KEY = "sb_publishable_ZUm8ZAc7V_dUWVrSM3Wjjg_fJvO5XyJ";
 </script>
 <!-- ▲▲▲ (교체 없이 앱 안 '공유 설정'에서 입력해도 됩니다) ▲▲▲ -->
@@ -62,9 +62,10 @@
   .urg-btn{font:inherit;font-size:12.5px;font-weight:700;color:var(--ink-soft);background:#fff;border:1px solid var(--line);border-radius:99px;padding:6px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
   .urg-btn.on{color:var(--urgent);background:var(--urgent-bg);border-color:#E9C4BF;}
   .cat-prog{display:flex;align-items:center;gap:8px;margin-top:9px;}
-  .cat-bar{flex:1;height:6px;border-radius:99px;background:var(--todo-bg);overflow:hidden;}
-  .cat-bar span{display:block;height:100%;background:var(--done);transition:width .45s cubic-bezier(.2,.7,.2,1);}
-  .cat-frac{font-size:11.5px;color:var(--ink-soft);font-weight:600;min-width:34px;text-align:right;}
+  .cat-bar{flex:1;height:6px;border-radius:99px;background:var(--todo-bg);overflow:hidden;display:flex;}
+  .cat-bar .b-done{height:100%;background:var(--done);transition:width .45s cubic-bezier(.2,.7,.2,1);}
+  .cat-bar .b-doing{height:100%;background:var(--doing);transition:width .45s cubic-bezier(.2,.7,.2,1);}
+  .cat-frac{font-size:11.5px;color:var(--ink-soft);font-weight:600;min-width:66px;text-align:right;}
 
   .task{border-bottom:1px solid var(--line);}
   .task:last-of-type{border-bottom:none;}
@@ -84,9 +85,10 @@
   .pill.on{font-weight:700;}
 
   .subprog{display:flex;align-items:center;gap:8px;margin-top:9px;}
-  .subprog .frac{font-size:12px;font-weight:700;color:var(--ink-soft);min-width:34px;}
-  .subprog .bar{flex:1;height:6px;border-radius:99px;background:var(--todo-bg);overflow:hidden;}
-  .subprog .bar span{display:block;height:100%;background:var(--done);transition:width .45s cubic-bezier(.2,.7,.2,1);}
+  .subprog .frac{font-size:12px;font-weight:700;color:var(--ink-soft);min-width:66px;}
+  .subprog .bar{flex:1;height:6px;border-radius:99px;background:var(--todo-bg);overflow:hidden;display:flex;}
+  .subprog .bar .b-done{height:100%;background:var(--done);transition:width .45s cubic-bezier(.2,.7,.2,1);}
+  .subprog .bar .b-doing{height:100%;background:var(--doing);transition:width .45s cubic-bezier(.2,.7,.2,1);}
 
   .sched{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-top:3px;}
   .sched.late{color:var(--urgent);} .sched.done{color:var(--done);}
@@ -107,7 +109,18 @@
   .sub-name.done{color:var(--ink-faint);text-decoration:line-through;text-decoration-color:#C7CDD7;}
   .subrow .detail{padding:0 0 10px 30px;}
 
-  .meta-block{margin-top:12px;padding-top:11px;border-top:1px solid var(--line);}
+  .meta-block{margin-top:2px;}
+  .sub-section{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);}
+  .save-row{margin-top:14px;display:flex;justify-content:flex-end;}
+  .act-btn.sm{flex:none;padding:8px 22px;}
+  .act-btn.on-lock{color:var(--urgent);border-color:#E9C4BF;background:var(--urgent-bg);}
+  .edit-meta{font-size:10.5px;color:var(--ink-faint);margin-top:10px;}
+  .undo-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:-90px;background:var(--ink);color:#fff;border-radius:12px;padding:11px 16px;display:flex;align-items:center;gap:16px;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:bottom .3s;z-index:50;font-size:13px;font-weight:600;}
+  .undo-bar.show{bottom:18px;}
+  .undo-bar button{font:inherit;font-weight:800;color:#86d0aa;background:none;border:none;cursor:pointer;}
+  body.view-only .del-btn,body.view-only .add,body.view-only .add-task,body.view-only .save-row,body.view-only #btnReset{display:none!important;}
+  body.view-only .pill,body.view-only .urg-btn{pointer-events:none;opacity:.75;}
+  body.view-only #cats .field input,body.view-only #cats .field textarea{pointer-events:none;background:#EEF1F5;color:var(--ink-soft);}
   .meta-label{font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--ink-faint);margin-bottom:6px;}
 
   .field{margin-top:10px;}
@@ -124,7 +137,7 @@
   .add button:hover{background:#dbe6f1;}
   .add-task{padding:10px 16px 14px;}
 
-  .actions{display:flex;gap:8px;margin-top:6px;}
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
   .act-btn{flex:1;font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);border-radius:10px;padding:11px;cursor:pointer;box-shadow:var(--shadow);}
   .act-btn:hover{color:var(--ink);border-color:#C2CAD6;}
   .act-btn.danger:hover{color:var(--urgent);border-color:#E9C4BF;}
@@ -173,6 +186,7 @@
 
   <div class="actions">
     <button class="act-btn" id="btnShare">⚙ 공유 설정</button>
+    <button class="act-btn" id="btnView">🔒 보기 전용</button>
     <button class="act-btn" id="btnReport">📋 보고용 요약</button>
     <button class="act-btn danger" id="btnReset">초기화</button>
   </div>
@@ -182,6 +196,7 @@
     <p class="hint">Supabase 프로젝트의 URL과 anon key를 붙여넣고 저장하면 실시간 공유로 전환됩니다. 다른 사람이 접속하려면 이 페이지를 웹(GitHub Pages 등)에 올려 링크로 공유해야 합니다.</p>
     <div class="field"><label>Project URL</label><input id="cfgUrl" type="text" placeholder="https://xxxx.supabase.co"></div>
     <div class="field"><label>anon public key</label><input id="cfgKey" type="text" placeholder="eyJ... (anon public)"></div>
+    <div class="field"><label>내 이름 (수정 기록용)</label><input id="cfgName" type="text" placeholder="예: 정규현"></div>
     <div class="panel-actions">
       <button class="act-btn brand" id="btnSaveCfg">저장 & 연결</button>
       <button class="act-btn" id="btnDisc">연결 끊기</button>
@@ -195,6 +210,7 @@
   </section>
 
   <p class="foot-note">상태·일정 변경은 자동 저장되어 다시 열어도 유지됩니다.</p>
+  <div class="undo-bar" id="undoBar"><span id="undoMsg"></span><button id="btnUndo">되돌리기</button></div>
 </div>
 
 <script>
@@ -261,6 +277,16 @@
   function lsGet(k){ try{ return window.localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ window.localStorage.setItem(k,v); return true; }catch(e){ return false; } }
   function lsDel(k){ try{ window.localStorage.removeItem(k); }catch(e){} }
+  var userName=lsGet("oda_user")||"";
+  var viewOnly=(lsGet("oda_viewonly")==="1");
+  var lastSnapshot=null, undoTimer=null;
+  function clone(x){ return JSON.parse(JSON.stringify(x)); }
+  function ensureName(){ if(!userName){ var n=window.prompt("수정 기록에 쓸 본인 이름/직책을 입력하세요 (예: 정규현)"); if(n&&n.trim()){ userName=n.trim(); lsSet("oda_user",userName); } } }
+  function touch(o){ if(o){ o.editedBy=userName||""; o.editedAt=Date.now(); } }
+  function fmtDT(ts){ if(!ts) return ""; var d=new Date(ts); return ("0"+(d.getMonth()+1)).slice(-2)+"."+("0"+d.getDate()).slice(-2)+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2); }
+  function todayISO(){ var d=new Date(); return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
+  function applyViewOnly(){ document.body.classList.toggle("view-only",viewOnly); var b=document.getElementById("btnView"); if(b){ b.textContent=viewOnly?"🔓 편집 잠금 해제":"🔒 보기 전용"; b.className="act-btn"+(viewOnly?" on-lock":""); } }
+  function showUndo(label){ var bar=document.getElementById("undoBar"); if(!bar) return; document.getElementById("undoMsg").textContent=label+" 완료"; bar.classList.add("show"); if(undoTimer) clearTimeout(undoTimer); undoTimer=setTimeout(function(){ bar.classList.remove("show"); lastSnapshot=null; },10000); }
   function cfgValid(c){ return !!(c&&c.url&&c.key&&/^https?:\/\//.test(c.url)&&c.url.indexOf("YOUR-PROJECT")<0&&c.key.indexOf("YOUR-")<0); }
   function constCfg(){ return {url:(window.SB_URL||""),key:(window.SB_KEY||"")}; }
   function readCfg(){
@@ -318,20 +344,16 @@
     }
     state.tasks=seed(); render(); if(hasStore) save();
   }
-  function save(){
-    state.updated=Date.now(); renderDate();
+  function persist(){
     if(sb){
-      if(saveTimer) clearTimeout(saveTimer);
-      saveTimer=setTimeout(function(){
-        var payload={tasks:state.tasks,updated:state.updated,clientId:clientId};
-        sb.from("oda_dashboard").upsert({id:ROW_ID,data:payload,updated_at:new Date().toISOString()}).then(function(r){ setStatus((r&&r.error)?"저장 오류":"실시간 연결됨", !(r&&r.error)); });
-      },400);
+      var payload={tasks:state.tasks,updated:state.updated,clientId:clientId};
+      sb.from("oda_dashboard").upsert({id:ROW_ID,data:payload,updated_at:new Date().toISOString()}).then(function(r){ setStatus((r&&r.error)?"저장 오류":"실시간 연결됨", !(r&&r.error)); });
       return;
     }
-    if(!hasStore) return;
-    if(saveTimer) clearTimeout(saveTimer);
-    saveTimer=setTimeout(function(){ try{ window.storage.set(KEY,JSON.stringify({tasks:state.tasks,updated:state.updated})); }catch(e){} },250);
+    if(hasStore){ try{ window.storage.set(KEY,JSON.stringify({tasks:state.tasks,updated:state.updated})); }catch(e){} }
   }
+  function save(){ state.updated=Date.now(); renderDate(); if(saveTimer) clearTimeout(saveTimer); saveTimer=setTimeout(persist, sb?400:250); }
+  function flushSave(){ state.updated=Date.now(); renderDate(); if(saveTimer){ clearTimeout(saveTimer); saveTimer=null; } persist(); }
 
   function fmtDate(ts){ var d=ts?new Date(ts):new Date(); var w=["일","월","화","수","목","금","토"]; return d.getFullYear()+"."+("0"+(d.getMonth()+1)).slice(-2)+"."+("0"+d.getDate()).slice(-2)+" ("+w[d.getDay()]+")"; }
   function renderDate(){ document.getElementById("dateLine").textContent="기준일 "+fmtDate(null)+(state.updated?" · 최종 수정 "+fmtDate(state.updated):""); }
@@ -356,6 +378,19 @@
     return t;
   }
   function subDone(t){ return t.subs.filter(function(s){return s.status==="done";}).length; }
+  function spanTxt(a,b){ if(a&&b) return fmtShort(a)+'~'+fmtShort(b); if(b) return fmtShort(b); if(a) return fmtShort(a)+'~'; return ''; }
+  function parentSched(t){
+    var starts=t.subs.map(function(s){return s.start;}).filter(Boolean).sort();
+    var ends=t.subs.map(function(s){return s.end;}).filter(Boolean).sort();
+    var exps=t.subs.map(function(s){return s.expEnd;}).filter(Boolean).sort();
+    var minStart=starts.length?starts[0]:"";
+    var allDone=t.subs.every(function(s){return s.status==="done";});
+    if(allDone&&ends.length) return '<div class="sched done">완료 '+spanTxt(minStart,ends[ends.length-1])+'</div>';
+    if(exps.length){ var maxExp=exps[exps.length-1]; var d=dday(maxExp); var tag=d>0?"D-"+d:(d===0?"D-DAY":(-d)+"일 지연"); return '<div class="sched'+(d<0?" late":"")+'">'+spanTxt(minStart,maxExp)+' · '+tag+'</div>'; }
+    if(minStart) return '<div class="sched">착수 '+fmtShort(minStart)+'</div>';
+    return '';
+  }
+  function taskSched(t){ if(!(t.subs&&t.subs.length)) return scheduleMeta(t); if(t.start||t.expEnd||t.end) return scheduleMeta(t); return parentSched(t); }
   function leafStatuses(){
     var arr=[];
     state.tasks.forEach(function(t){ if(t.subs&&t.subs.length) t.subs.forEach(function(s){arr.push(s.status);}); else arr.push(t.status); });
@@ -389,6 +424,7 @@
     h+='<div class="field-row"><div class="field"><label>종료일</label><input type="date" data-act="field" data-field="end" data-id="'+o.id+'" value="'+esc(o.end)+'"></div>';
     h+='<div class="field"><label>담당</label><input data-act="field" data-field="owner" data-id="'+o.id+'" value="'+esc(o.owner)+'" placeholder="예: 본인 / 코이카"></div></div>';
     h+='<div class="field"><label>비고</label><textarea rows="2" data-act="field" data-field="memo" data-id="'+o.id+'" placeholder="진행 메모 / 선행조건 등">'+esc(o.memo)+'</textarea></div>';
+    if(o.editedAt){ h+='<div class="edit-meta">최종 수정 '+(o.editedBy?esc(o.editedBy):'—')+' · '+fmtDT(o.editedAt)+'</div>'; }
     return h;
   }
   function pillsHTML(o){
@@ -417,7 +453,8 @@
       var catUrg=tasks.some(function(t){return t.urgent||(t.subs&&t.subs.some(function(s){return s.urgent;}));});
       html+='<section class="cat'+(catUrg?' urgent':'')+'">';
       html+='<div class="cat-head"><div class="cat-top"><span class="cat-idx">'+cat.idx+'</span><span class="cat-title">'+esc(cat.title)+'</span>'+(catUrg?'<span class="badge-urgent">긴급</span>':'')+'</div>';
-      html+='<div class="cat-prog"><div class="cat-bar"><span style="width:'+frac+'%"></span></div><span class="cat-frac">'+lf.done+'/'+ln+'</span></div></div>';
+      var fdoing=ln?Math.round(lf.doing/ln*100):0;
+      html+='<div class="cat-prog"><div class="cat-bar"><span class="b-done" style="width:'+frac+'%"></span><span class="b-doing" style="width:'+fdoing+'%"></span></div><span class="cat-frac">'+lf.done+'/'+ln+' · '+frac+'%</span></div></div>';
 
       tasks.forEach(function(t){
         var op=state.open[t.id];
@@ -425,26 +462,27 @@
         var allDone=hasSub&&t.subs.every(function(s){return s.status==="done";});
         html+='<div class="task'+(t.urgent?' urgent-item':'')+'"><div class="task-main"><span class="ref">'+esc(t.ref)+'</span>';
         html+='<div class="task-body"><div class="task-name'+((hasSub&&allDone)||(!hasSub&&t.status==="done")?' done':'')+'">'+esc(t.name)+(t.urgent?' <span class="tag-urg">긴급</span>':'')+'</div>';
-        html+=scheduleMeta(effSched(t));
-        if(hasSub){ var d=subDone(t); var f=t.subs.length?Math.round(d/t.subs.length*100):0;
-          html+='<div class="subprog"><span class="frac">'+d+'/'+t.subs.length+'</span><div class="bar"><span style="width:'+f+'%"></span></div></div>';
+        html+=taskSched(t);
+        if(hasSub){ var d=subDone(t); var dg=t.subs.filter(function(s){return s.status==="doing";}).length; var tot=t.subs.length; var f=tot?Math.round(d/tot*100):0; var fg=tot?Math.round(dg/tot*100):0;
+          html+='<div class="subprog"><span class="frac">'+d+'/'+tot+' · '+f+'%</span><div class="bar"><span class="b-done" style="width:'+f+'%"></span><span class="b-doing" style="width:'+fg+'%"></span></div></div>';
         } else { html+=pillsHTML(t); }
-        html+='</div><div class="task-tools"><button class="icon-btn" data-act="toggle" data-id="'+t.id+'">'+(op?'▴':'▾')+'</button><button class="icon-btn" data-act="del" data-id="'+t.id+'">✕</button></div></div>';
+        html+='</div><div class="task-tools"><button class="icon-btn" data-act="toggle" data-id="'+t.id+'">'+(op?'▴':'▾')+'</button><button class="icon-btn del-btn" data-act="del" data-id="'+t.id+'">✕</button></div></div>';
 
         html+='<div class="detail'+(op?' open':'')+'">';
-        html+='<div class="sub-label">세부 태스크</div><div class="subs">';
+        html+='<div class="meta-block"><div class="meta-label">항목 일정·담당·비고</div>'+fieldsHTML(t)+'</div>';
+        html+='<div class="sub-section"><div class="sub-label">세부 태스크</div><div class="subs">';
         t.subs.forEach(function(s,i){
           var sop=state.open[s.id];
           html+='<div class="subrow"><div class="sub-main"><span class="ref ref-sm">'+esc(t.ref)+'-'+(i+1)+'</span>';
           html+='<div class="task-body"><div class="sub-name'+(s.status==="done"?' done':'')+'">'+esc(s.name)+(s.urgent?' <span class="tag-urg">긴급</span>':'')+'</div>';
           html+=scheduleMeta(s)+pillsHTML(s)+'</div>';
-          html+='<div class="task-tools"><button class="icon-btn" data-act="toggle" data-id="'+s.id+'">'+(sop?'▴':'▾')+'</button><button class="icon-btn" data-act="del" data-id="'+s.id+'">✕</button></div></div>';
-          html+='<div class="detail'+(sop?' open':'')+'">'+fieldsHTML(s)+'</div></div>';
+          html+='<div class="task-tools"><button class="icon-btn" data-act="toggle" data-id="'+s.id+'">'+(sop?'▴':'▾')+'</button><button class="icon-btn del-btn" data-act="del" data-id="'+s.id+'">✕</button></div></div>';
+          html+='<div class="detail'+(sop?' open':'')+'">'+fieldsHTML(s)+'<div class="save-row"><button class="act-btn brand sm" data-act="savedone" data-id="'+s.id+'">저장</button></div></div></div>';
         });
         html+='</div>';
         html+='<div class="add"><div class="add-row"><input type="text" data-addsub="'+t.id+'" placeholder="세부 태스크 추가"><button data-act="addsub" data-tid="'+t.id+'">추가</button></div></div>';
-
-        html+='<div class="meta-block"><div class="meta-label">항목 일정·담당·비고</div>'+fieldsHTML(t)+'</div>';
+        html+='</div>';
+        html+='<div class="save-row"><button class="act-btn brand sm" data-act="savedone" data-id="'+t.id+'">저장</button></div>';
         html+='</div></div>';
       });
 
@@ -459,15 +497,16 @@
   root.addEventListener("click",function(e){
     var el=e.target.closest("[data-act]"); if(!el) return;
     var act=el.getAttribute("data-act"), id=el.getAttribute("data-id");
-    if(act==="status"){ var it=findItem(id); if(it){ it.status=el.getAttribute("data-status"); save(); render(); } }
+    if(act==="status"){ var it=findItem(id); if(it){ ensureName(); var ns0=el.getAttribute("data-status"); it.status=ns0; if(ns0==="done"&&!it.end){ it.end=todayISO(); it.endAuto=true; } else if(ns0!=="done"&&it.endAuto){ it.end=""; it.endAuto=false; } touch(it); save(); render(); } }
     else if(act==="toggle"){ state.open[id]=!state.open[id]; render(); }
-    else if(act==="urgent"){ var iu=findItem(id); if(iu){ iu.urgent=!iu.urgent; save(); render(); } }
-    else if(act==="del"){ var it2=findItem(id); if(it2&&confirm('"'+it2.name+'" 항목을 삭제할까요?')){ delItem(id); delete state.open[id]; save(); render(); } }
-    else if(act==="addsub"){ var tid=el.getAttribute("data-tid"); var inp=document.querySelector('[data-addsub="'+tid+'"]'); var v=inp.value.trim(); if(!v) return; var t=findItem(tid); if(t){ if(!t.subs)t.subs=[]; var ns=sub(v); ns.id=uid(); t.subs.push(ns); state.open[tid]=true; save(); render(); } }
+    else if(act==="savedone"){ ensureName(); var itd=findItem(id); if(itd) touch(itd); flushSave(); state.open[id]=false; render(); }
+    else if(act==="urgent"){ var iu=findItem(id); if(iu){ ensureName(); iu.urgent=!iu.urgent; touch(iu); save(); render(); } }
+    else if(act==="del"){ var it2=findItem(id); if(it2&&confirm('"'+it2.name+'" 항목을 삭제할까요?')){ lastSnapshot=clone(state.tasks); delItem(id); delete state.open[id]; save(); render(); showUndo("삭제"); } }
+    else if(act==="addsub"){ var tid=el.getAttribute("data-tid"); var inp=document.querySelector('[data-addsub="'+tid+'"]'); var v=inp.value.trim(); if(!v) return; var t=findItem(tid); if(t){ ensureName(); if(!t.subs)t.subs=[]; var ns=sub(v); ns.id=uid(); touch(ns); t.subs.push(ns); state.open[tid]=true; save(); render(); } }
     else if(act==="add"){ var cat=el.getAttribute("data-cat"); var inp2=document.querySelector('[data-addcat="'+cat+'"]'); var v2=inp2.value.trim(); if(!v2) return; state.tasks.push({id:uid(),cat:cat,ref:"+",name:v2,status:"todo",urgent:false,owner:"",start:"",expEnd:"",end:"",memo:"",subs:[]}); save(); render(); }
   });
-  root.addEventListener("input",function(e){ var el=e.target.closest("[data-act='field']"); if(!el) return; var it=findItem(el.getAttribute("data-id")); if(it){ it[el.getAttribute("data-field")]=el.value; save(); } });
-  root.addEventListener("change",function(e){ var el=e.target.closest("[data-act='field']"); if(!el) return; var it=findItem(el.getAttribute("data-id")); if(!it) return; var f=el.getAttribute("data-field"); it[f]=el.value; save(); if(f==="start"||f==="expEnd"||f==="end") render(); });
+  root.addEventListener("input",function(e){ var el=e.target.closest("[data-act='field']"); if(!el) return; var it=findItem(el.getAttribute("data-id")); if(it){ it[el.getAttribute("data-field")]=el.value; touch(it); save(); } });
+  root.addEventListener("change",function(e){ var el=e.target.closest("[data-act='field']"); if(!el) return; var it=findItem(el.getAttribute("data-id")); if(!it) return; var f=el.getAttribute("data-field"); it[f]=el.value; touch(it); save(); if(f==="start"||f==="expEnd"||f==="end") render(); });
   root.addEventListener("keydown",function(e){
     if(e.key!=="Enter") return;
     if(e.target.matches("[data-addsub]")){ var tid=e.target.getAttribute("data-addsub"); var v=e.target.value.trim(); if(!v) return; var t=findItem(tid); if(t){ if(!t.subs)t.subs=[]; var ns=sub(v); ns.id=uid(); t.subs.push(ns); state.open[tid]=true; save(); render(); } }
@@ -477,12 +516,15 @@
   document.addEventListener("focusout",function(){ setTimeout(function(){ if(pendingRemote && !isEditing()){ applyRemote(pendingRemote); pendingRemote=null; } },60); });
   document.getElementById("btnShare").addEventListener("click",function(){
     var pn=document.getElementById("sharePanel"); pn.classList.toggle("open");
-    if(pn.classList.contains("open")){ var c=readCfg(); document.getElementById("cfgUrl").value=(c&&cfgValid(c))?c.url:""; document.getElementById("cfgKey").value=(c&&cfgValid(c))?c.key:""; pn.scrollIntoView({behavior:"smooth",block:"start"}); }
+    if(pn.classList.contains("open")){ var c=readCfg(); document.getElementById("cfgUrl").value=(c&&cfgValid(c))?c.url:""; document.getElementById("cfgKey").value=(c&&cfgValid(c))?c.key:""; document.getElementById("cfgName").value=userName; pn.scrollIntoView({behavior:"smooth",block:"start"}); }
   });
   document.getElementById("btnSaveCfg").addEventListener("click",saveCfg);
   document.getElementById("btnDisc").addEventListener("click",function(){ if(confirm("실시간 공유를 끊고 로컬 모드로 전환할까요?")) disconnectShare(); });
-  document.getElementById("btnReset").addEventListener("click",function(){ if(!confirm("모든 항목·세부태스크를 초기 상태로 되돌립니다. 진행할까요?")) return; state.tasks=seed(); state.open={}; save(); render(); });
+  document.getElementById("btnReset").addEventListener("click",function(){ var a=window.prompt('전체 초기화는 모두에게 적용됩니다. 진행하려면 "초기화" 를 입력하세요 (되돌리기는 10초간 가능).'); if(a!=="초기화") return; lastSnapshot=clone(state.tasks); state.tasks=seed(); state.open={}; save(); render(); showUndo("초기화"); });
   document.getElementById("btnReport").addEventListener("click",function(){ var r=document.getElementById("report"); r.classList.toggle("open"); if(r.classList.contains("open")){ buildReport(); r.scrollIntoView({behavior:"smooth",block:"start"}); } });
+  document.getElementById("btnView").addEventListener("click",function(){ viewOnly=!viewOnly; lsSet("oda_viewonly",viewOnly?"1":"0"); applyViewOnly(); });
+  document.getElementById("btnUndo").addEventListener("click",function(){ if(lastSnapshot){ state.tasks=lastSnapshot; lastSnapshot=null; if(undoTimer) clearTimeout(undoTimer); document.getElementById("undoBar").classList.remove("show"); save(); render(); } });
+  document.getElementById("cfgName").addEventListener("input",function(e){ userName=e.target.value.trim(); lsSet("oda_user",userName); });
 
   function aggMark(t){
     if(t.subs&&t.subs.length){ var d=subDone(t); if(d===t.subs.length) return "✔"; if(d>0||t.subs.some(function(s){return s.status==="doing";})) return "◐"; return "□"; }
@@ -509,6 +551,7 @@
     document.getElementById("reportText").textContent=L.join("\n").replace(/\n+$/,"");
   }
 
+  applyViewOnly();
   load();
 })();
 </script>
