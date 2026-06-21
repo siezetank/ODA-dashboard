@@ -1,6 +1,6 @@
 // ODA 추진현황 PWA service worker
 // 캐시 버전을 올리면(예: oda-v2) 기존 캐시를 비우고 새로 받습니다.
-const CACHE = "oda-v20";
+const CACHE = "oda-v25";
 const SHELL = [
   "./",
   "./index.html",
